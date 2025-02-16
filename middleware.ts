@@ -9,5 +9,9 @@ export default authMiddleware({
 });
 
 export const config = {
-  matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: [
+    "/((?!.+\\.[\\w]+$|_next).*)", // Exclude static files and _next
+    "/",                            // Include root path
+    "/(api|trpc)(.*)"              // Include API and tRPC routes
+  ]
 };
