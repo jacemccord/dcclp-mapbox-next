@@ -5,7 +5,6 @@ import Map, { Marker } from 'react-map-gl'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { MapPin } from 'lucide-react'
 
 interface LocationDetails {
   id: string
@@ -77,16 +76,24 @@ export default function MapExplorer() {
   const [searchInput, setSearchInput] = useState('')
   const [searchResults, setSearchResults] = useState<LocationDetails[]>([])
 
-  const centerOnMcLeod = () => {
-    setViewState({
-      longitude: MCLEOD_LAKE_FIRST_NATION.coordinates[0],
-      latitude: MCLEOD_LAKE_FIRST_NATION.coordinates[1],
-      zoom: 12,
-      bearing: 0,
-      pitch: 0,
-      transitionDuration: 2000
-    })
-  }
+  // Add this function inside MapExplorer component
+  const handleSearch = () => {
+    if (searchInput.trim()) {
+      const results = searchLocations(searchInput, locations);
+      setSearchResults(results);
+      if (results.length > 0) {
+        setViewState({
+          longitude: results[0].coordinates[0],
+          latitude: results[0].coordinates[1],
+          zoom: 12,
+          bearing: 0,
+          pitch: 0,
+          transitionDuration: 2000
+        });
+        setSelectedLocation(results[0]);
+      }
+    }
+  };
 
   return (
     <div className="container mx-auto p-6">
@@ -98,40 +105,21 @@ export default function MapExplorer() {
         <Card className="p-6">
           <div className="flex gap-4">
             <Input
-              placeholder="Search for a location..."
+              placeholder="Enter a First Nation Name, Chief, Address..."
               className="flex-1"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearch();
+                }
+              }}
             />
             <Button 
               variant="default"
-              onClick={() => {
-                if (searchInput.trim()) {
-                  const results = searchLocations(searchInput, locations);
-                  setSearchResults(results);
-                  if (results.length > 0) {
-                    // Center map on first result
-                    setViewState({
-                      longitude: results[0].coordinates[0],
-                      latitude: results[0].coordinates[1],
-                      zoom: 12,
-                      bearing: 0,
-                      pitch: 0,
-                      transitionDuration: 2000
-                    });
-                    setSelectedLocation(results[0]);
-                  }
-                }
-              }}
+              onClick={handleSearch}
             >
               Search
-            </Button>
-            <Button 
-              variant="secondary"
-              onClick={centerOnMcLeod}
-            >
-              <MapPin className="h-4 w-4 mr-2" />
-              Center on McLeod Lake
             </Button>
           </div>
         </Card>
