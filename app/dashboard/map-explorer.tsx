@@ -11,23 +11,33 @@ interface LocationDetails {
   id: string
   name: string
   chief: string
-  phoneNumber: string
   address: string
+  population: string
   coordinates: readonly [number, number]
 }
 
 // Define the exact coordinates for McLeod Lake
-const MCLEOD_LAKE_LOCATION = {
+const MCLEOD_LAKE_FIRST_NATION = {
   id: '1',
   name: 'McLeod Lake Indian Band',
   chief: 'Chief Harley Chingee',
-  phoneNumber: '(250) 555-0123',
-  address: '123 Example Street, McLeod Lake, BC V0J 2G0',
-  coordinates: [-123.0890, 55.0379] // McLeod Lake coordinates
+  address: 'General Delivery, McLeod Lake, BC V0J 2G0',
+  population: '584',
+  coordinates: [-123.0890, 55.0379]
+} as const;
+
+const WEST_MOBERLY_FIRST_NATION = {
+  id: '2',
+  name: 'West Moberly First Nation',
+  chief: 'Chief Roland Willson',
+  address: 'Box 90, Moberly Lake, BC V0J 1X0',
+  population: '374',
+  coordinates: [-121.8336145, 55.8305921]
 } as const;
 
 const locations: LocationDetails[] = [
-  MCLEOD_LAKE_LOCATION
+  MCLEOD_LAKE_FIRST_NATION,
+  WEST_MOBERLY_FIRST_NATION
   // Add more locations as needed
 ]
 
@@ -41,23 +51,36 @@ type ViewStateType = {
   transitionDuration: number;
 }
 
+console.log('McLeod Lake coordinates:', MCLEOD_LAKE_FIRST_NATION.coordinates);
+
+// Add this function before the MapExplorer component
+const searchLocations = (searchText: string, locations: LocationDetails[]) => {
+  const searchLower = searchText.toLowerCase();
+  return locations.filter(location => 
+    location.name.toLowerCase().includes(searchLower) ||
+    location.chief.toLowerCase().includes(searchLower) ||
+    location.address.toLowerCase().includes(searchLower)
+  );
+};
+
 export default function MapExplorer() {
   const [viewState, setViewState] = useState<ViewStateType>({
-    longitude: MCLEOD_LAKE_LOCATION.coordinates[0],
-    latitude: MCLEOD_LAKE_LOCATION.coordinates[1],
+    longitude: MCLEOD_LAKE_FIRST_NATION.coordinates[0],
+    latitude: MCLEOD_LAKE_FIRST_NATION.coordinates[1],
     zoom: 5,
     bearing: 0,
     pitch: 0,
     transitionDuration: 0
   })
   
-  const [selectedLocation, setSelectedLocation] = useState<typeof MCLEOD_LAKE_LOCATION | null>(null)
+  const [selectedLocation, setSelectedLocation] = useState<LocationDetails | null>(null)
   const [searchInput, setSearchInput] = useState('')
+  const [searchResults, setSearchResults] = useState<LocationDetails[]>([])
 
   const centerOnMcLeod = () => {
     setViewState({
-      longitude: MCLEOD_LAKE_LOCATION.coordinates[0],
-      latitude: MCLEOD_LAKE_LOCATION.coordinates[1],
+      longitude: MCLEOD_LAKE_FIRST_NATION.coordinates[0],
+      latitude: MCLEOD_LAKE_FIRST_NATION.coordinates[1],
       zoom: 12,
       bearing: 0,
       pitch: 0,
@@ -81,6 +104,29 @@ export default function MapExplorer() {
               onChange={(e) => setSearchInput(e.target.value)}
             />
             <Button 
+              variant="default"
+              onClick={() => {
+                if (searchInput.trim()) {
+                  const results = searchLocations(searchInput, locations);
+                  setSearchResults(results);
+                  if (results.length > 0) {
+                    // Center map on first result
+                    setViewState({
+                      longitude: results[0].coordinates[0],
+                      latitude: results[0].coordinates[1],
+                      zoom: 12,
+                      bearing: 0,
+                      pitch: 0,
+                      transitionDuration: 2000
+                    });
+                    setSelectedLocation(results[0]);
+                  }
+                }
+              }}
+            >
+              Search
+            </Button>
+            <Button 
               variant="secondary"
               onClick={centerOnMcLeod}
             >
@@ -97,27 +143,31 @@ export default function MapExplorer() {
               ...evt.viewState,
               transitionDuration: state.transitionDuration
             }))}
-            mapStyle="mapbox://styles/jacemccord/cm6ifqzeb00a101re33gth867"
+            mapStyle="mapbox://styles/mapbox/streets-v12"
             mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
             style={{ width: '100%', height: '100%' }}
           >
-            <Marker 
-              longitude={MCLEOD_LAKE_LOCATION.coordinates[0]}
-              latitude={MCLEOD_LAKE_LOCATION.coordinates[1]}
-              anchor="bottom"
-              onClick={(e) => {
-                e.originalEvent.stopPropagation();
-                setSelectedLocation(MCLEOD_LAKE_LOCATION);
-              }}
-            >
-              <div className="w-6 h-6 bg-red-600 rounded-full border-2 border-white shadow-lg cursor-pointer" />
-            </Marker>
+            {locations.map((location) => (
+              <Marker 
+                key={location.id}
+                longitude={location.coordinates[0]}
+                latitude={location.coordinates[1]}
+                anchor="center"
+                className="mapboxgl-marker"
+                onClick={(e) => {
+                  e.originalEvent.stopPropagation();
+                  setSelectedLocation(location);
+                }}
+              >
+                <div className="w-6 h-6 bg-red-600 rounded-full border-2 border-white shadow-lg cursor-pointer" />
+              </Marker>
+            ))}
           </Map>
           
           <div className="absolute bottom-8 left-2 bg-slate-800 text-white p-2 rounded shadow z-10 text-sm space-y-1">
             <p>Center: {viewState.longitude.toFixed(4)}, {viewState.latitude.toFixed(4)}</p>
             <p>Zoom: {viewState.zoom.toFixed(2)}</p>
-            <p>Marker: {MCLEOD_LAKE_LOCATION.coordinates[0].toFixed(4)}, {MCLEOD_LAKE_LOCATION.coordinates[1].toFixed(4)}</p>
+            <p>Marker: {MCLEOD_LAKE_FIRST_NATION.coordinates[0].toFixed(4)}, {MCLEOD_LAKE_FIRST_NATION.coordinates[1].toFixed(4)}</p>
           </div>
         </Card>
 
@@ -131,8 +181,8 @@ export default function MapExplorer() {
                   <p>{selectedLocation.chief}</p>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-600">Phone Number</h3>
-                  <p>{selectedLocation.phoneNumber}</p>
+                  <h3 className="font-semibold text-gray-600">Population</h3>
+                  <p>{selectedLocation.population}</p>
                 </div>
                 <div className="col-span-2">
                   <h3 className="font-semibold text-gray-600">Address</h3>

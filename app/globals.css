@@ -71,3 +71,12 @@
     @apply bg-background text-foreground antialiased;
   }
 }
+
+.mapboxgl-marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+  opacity:1;
+  transition: opacity .2s
+}
