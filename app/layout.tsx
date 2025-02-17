@@ -12,7 +12,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'MapApp',
+  title: 'DCCLP MapApp',
   description: 'Interactive map application with authentication',
 };
 

@@ -30,7 +30,7 @@ export function NavigationMenu() {
               <Link href="/" legacyBehavior passHref>
                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                   <MapIcon className="mr-2 h-4 w-4" />
-                  MapApp
+                  DCCLP MapApp
                 </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
