@@ -151,12 +151,6 @@ export default function MapExplorer() {
               </Marker>
             ))}
           </Map>
-          
-          <div className="absolute bottom-8 left-2 bg-slate-800 text-white p-2 rounded shadow z-10 text-sm space-y-1">
-            <p>Center: {viewState.longitude.toFixed(4)}, {viewState.latitude.toFixed(4)}</p>
-            <p>Zoom: {viewState.zoom.toFixed(2)}</p>
-            <p>Marker: {MCLEOD_LAKE_FIRST_NATION.coordinates[0].toFixed(4)}, {MCLEOD_LAKE_FIRST_NATION.coordinates[1].toFixed(4)}</p>
-          </div>
         </Card>
 
         {selectedLocation && (
