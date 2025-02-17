@@ -30,8 +30,8 @@ export default async function Home() {
             </>
           ) : (
             <Button asChild>
-              <Link href="/dashboard">
-                Go to Dashboard
+              <Link href="/map-explorer">
+                Go to Map Explorer
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>

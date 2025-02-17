@@ -36,9 +36,9 @@ export function NavigationMenu() {
             </NavigationMenuItem>
             {isSignedIn && (
               <NavigationMenuItem>
-                <Link href="/dashboard" legacyBehavior passHref>
+                <Link href="/map-explorer" legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Dashboard
+                    Map Explorer
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
